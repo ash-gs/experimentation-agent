@@ -1,0 +1,36 @@
+# Core Agent Framework
+langchain>=0.1.0
+langgraph>=0.0.20
+langchain-anthropic>=0.1.0
+anthropic>=0.18.0
+
+# Data & Statistics
+pandas>=2.2.0
+numpy>=1.26.0
+scipy>=1.12.0
+statsmodels>=0.14.0
+pingouin>=0.5.4
+
+# Database
+sqlalchemy>=2.0.0
+
+# Validation & Configuration
+pydantic>=2.6.0
+pydantic-settings>=2.1.0
+python-dotenv>=1.0.0
+
+# CLI & Visualization
+rich>=13.7.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
+
+# Synthetic Data Generation
+faker>=22.0.0
+
+# Development Tools
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+black>=24.0.0
+ruff>=0.2.0
+mypy>=1.8.0
+pre-commit>=3.6.0
