@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     # LLM Configuration
     anthropic_api_key: str = Field(default="", description="Anthropic API key for Claude")
     default_model: str = Field(
-        default="claude-3-5-sonnet-20241022", description="Default Claude model"
+        default="claude-3-haiku-20240307", description="Default Claude model"
     )
     complex_analysis_model: str = Field(
         default="claude-opus-4-5-20251101", description="Model for complex analysis tasks"
