@@ -104,38 +104,35 @@ class DesignConfigSchema(BaseModel):
 class StatisticalTestResultSchema(BaseModel):
     """Schema for statistical test results."""
 
-    test_name: str = Field(..., description="Name of statistical test")
-    metric: str = Field(..., description="Metric tested")
+    test_type: str = Field(..., description="Type of statistical test")
     control_mean: float = Field(..., description="Control variant mean")
     treatment_mean: float = Field(..., description="Treatment variant mean")
+    control_std: float | None = Field(None, description="Control standard deviation")
+    treatment_std: float | None = Field(None, description="Treatment standard deviation")
+    control_n: int = Field(..., description="Control sample size")
+    treatment_n: int = Field(..., description="Treatment sample size")
+    statistic: float = Field(..., description="Test statistic value")
     p_value: float = Field(..., description="P-value from test")
     confidence_interval_lower: float = Field(..., description="CI lower bound")
     confidence_interval_upper: float = Field(..., description="CI upper bound")
-    effect_size: float = Field(..., description="Effect size (relative difference)")
-    is_significant: bool = Field(..., description="Whether result is statistically significant")
-    sample_size_control: int = Field(..., description="Sample size for control")
-    sample_size_treatment: int = Field(..., description="Sample size for treatment")
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    confidence_level: float = Field(default=0.95, description="Confidence level")
+    effect_size: float = Field(..., description="Absolute effect size")
+    relative_effect: float | None = Field(None, description="Relative effect (lift %)")
+    statistically_significant: bool = Field(..., description="Whether result is statistically significant")
+    practical_significance: bool | None = Field(None, description="Whether effect is practically significant")
 
 
 class AnalysisResultSchema(BaseModel):
     """Schema for experiment analysis results."""
 
-    test_results: list[StatisticalTestResultSchema] = Field(
-        ..., description="Statistical test results"
-    )
-    primary_metric_significant: bool = Field(
-        ..., description="Whether primary metric is significant"
-    )
-    guardrail_violations: list[str] = Field(
-        default_factory=list, description="Guardrail metrics that regressed"
-    )
-    summary: str = Field(..., description="Plain English summary of results")
-    key_findings: list[str] = Field(..., description="Key findings")
-    confidence_assessment: str = Field(..., description="Assessment of result reliability")
-    caveats: list[str] = Field(default_factory=list, description="Important caveats")
+    analysis_id: UUID = Field(..., description="Unique analysis ID")
+    experiment_id: UUID = Field(..., description="Experiment ID")
+    primary_metric_result: StatisticalTestResultSchema = Field(..., description="Primary metric test result")
+    secondary_metrics: list[StatisticalTestResultSchema] | None = Field(None, description="Secondary metric results")
+    guardrail_violations: list[str] | None = Field(None, description="Guardrail metrics that regressed")
+    sample_ratio_mismatch: bool = Field(default=False, description="Whether SRM detected")
     data_quality_issues: list[str] = Field(default_factory=list, description="Data quality concerns")
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    interpretation: str | None = Field(None, description="LLM interpretation of results")
 
 
 # ============================================================================
@@ -146,13 +143,13 @@ class AnalysisResultSchema(BaseModel):
 class DecisionSchema(BaseModel):
     """Schema for final decision on experiment."""
 
+    decision_id: UUID = Field(..., description="Unique decision ID")
     recommendation: DecisionRecommendation = Field(..., description="Recommendation: ship/no-ship/iterate")
     confidence: float = Field(..., description="Confidence in decision", ge=0, le=1)
     rationale: str = Field(..., description="Detailed reasoning")
     key_findings: list[str] = Field(..., description="Key findings driving decision")
     next_steps: list[str] = Field(..., description="Recommended actions")
-    risks: list[str] = Field(default_factory=list, description="Risks to consider")
-    business_impact: str = Field(..., description="Expected business impact")
+    risks: list[str] | None = Field(None, description="Risks to consider")
     metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 

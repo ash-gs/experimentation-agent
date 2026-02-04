@@ -163,22 +163,31 @@ Always design for statistical rigor while considering practical constraints.
         rand_unit_map = {
             "user": RandomizationUnit.USER,
             "session": RandomizationUnit.SESSION,
-            "request": RandomizationUnit.REQUEST,
+            "device": RandomizationUnit.DEVICE,
+            "ip": RandomizationUnit.IP,
         }
         randomization_unit = rand_unit_map.get(
             output.randomization_unit.lower(), RandomizationUnit.USER
         )
 
+        # Infer metric type from metric name
+        from ..data.schemas import MetricType
+        metric_type = MetricType.CONVERSION_RATE if "rate" in hypothesis.metric.lower() else MetricType.CONTINUOUS
+
         # Build design config
         design = DesignConfigSchema(
+            hypothesis=hypothesis,
             variants=[control_variant, treatment_variant],
+            primary_metric=hypothesis.metric,
+            metric_type=metric_type,
             sample_size_per_variant=sample_size,
-            duration_days=duration_days,
             power=output.recommended_power,
-            significance_level=output.recommended_alpha,
-            minimum_detectable_effect=mde,
+            alpha=output.recommended_alpha,
             randomization_unit=randomization_unit,
-            traffic_allocation=output.traffic_allocation_percent / 100 * 2,  # Total traffic
+            estimated_duration_days=duration_days,
+            guardrail_metrics=output.guardrail_metrics,
+            design_rationale=output.design_rationale,
+            risks=output.risks,
         )
 
         logger.info(
