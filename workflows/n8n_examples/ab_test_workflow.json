@@ -1,0 +1,97 @@
+{
+  "name": "AB Testing Agent Workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/hypothesis/generate",
+        "options": {},
+        "bodyParametersJson": "={\n  \"business_goal\": \"{{ $json.business_goal }}\",\n  \"context\": {}\n}"
+      },
+      "name": "Generate Hypothesis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/design/create",
+        "options": {},
+        "bodyParametersJson": "={\n  \"hypothesis\": {{ $json.hypothesis }},\n  \"traffic_percentage\": 100,\n  \"daily_users\": 10000,\n  \"context\": {}\n}"
+      },
+      "name": "Design Experiment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/analysis/analyze",
+        "options": {},
+        "bodyParametersJson": "={\n  \"control_data\": {\n    \"values\": [1, 0, 1, 1, 0, 0, 1, 0, 1, 1]\n  },\n  \"treatment_data\": {\n    \"values\": [1, 1, 1, 1, 0, 1, 1, 0, 1, 1]\n  },\n  \"design\": {{ $json.design }},\n  \"hypothesis\": {{ $node[\"Generate Hypothesis\"].json.hypothesis }}\n}"
+      },
+      "name": "Analyze Results",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/decision/make",
+        "options": {},
+        "bodyParametersJson": "={\n  \"analysis\": {{ $json.analysis }},\n  \"hypothesis\": {{ $node[\"Generate Hypothesis\"].json.hypothesis }},\n  \"business_context\": {\n    \"stakeholder_input\": \"Need 95% confidence for launch\"\n  }\n}"
+      },
+      "name": "Make Decision",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "message": "=Experiment Complete!\n\nHypothesis: {{ $node[\"Generate Hypothesis\"].json.hypothesis.description }}\n\nDecision: {{ $json.decision.recommendation }}\nConfidence: {{ $json.decision.confidence }}\n\nRationale: {{ $json.decision.rationale }}"
+      },
+      "name": "Notify Results",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1250, 300],
+      "credentials": {
+        "slackApi": {
+          "id": "1",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [[{ "node": "Generate Hypothesis", "type": "main", "index": 0 }]]
+    },
+    "Generate Hypothesis": {
+      "main": [[{ "node": "Design Experiment", "type": "main", "index": 0 }]]
+    },
+    "Design Experiment": {
+      "main": [[{ "node": "Analyze Results", "type": "main", "index": 0 }]]
+    },
+    "Analyze Results": {
+      "main": [[{ "node": "Make Decision", "type": "main", "index": 0 }]]
+    },
+    "Make Decision": {
+      "main": [[{ "node": "Notify Results", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "tags": [],
+  "pinData": {},
+  "versionId": "1"
+}
