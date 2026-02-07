@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from ab_testing_agent.tools.statistical.metrics import (
+from testing_agent.tools.statistical.metrics import (
     ContinuousMetric,
     ConversionMetric,
     SRMResult,

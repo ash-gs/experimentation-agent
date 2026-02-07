@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from ab_testing_agent.tools.statistical.confidence_intervals import (
+from testing_agent.tools.statistical.confidence_intervals import (
     ConfidenceInterval,
     difference_confidence_interval_means,
     difference_confidence_interval_proportions,
