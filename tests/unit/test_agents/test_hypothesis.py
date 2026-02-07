@@ -3,8 +3,8 @@
 import pytest
 from unittest.mock import Mock, patch
 
-from ab_testing_agent.agents.hypothesis import HypothesisAgent, HypothesisOutput
-from ab_testing_agent.data.schemas import Direction
+from testing_agent.agents.hypothesis import HypothesisAgent, HypothesisOutput
+from testing_agent.data.schemas import Direction
 
 
 class TestHypothesisAgent:

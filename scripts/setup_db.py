@@ -6,8 +6,8 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from ab_testing_agent.data.repositories import ExperimentRepository
-from ab_testing_agent.utils.logging import get_logger
+from testing_agent.data.repositories import ExperimentRepository
+from testing_agent.utils.logging import get_logger
 
 logger = get_logger("setup_db")
 

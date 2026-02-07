@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from ab_testing_agent.tools.statistical.effect_sizes import (
+from testing_agent.tools.statistical.effect_sizes import (
     EffectSizeResult,
     absolute_difference,
     cohens_d,
