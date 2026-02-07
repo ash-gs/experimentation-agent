@@ -4,7 +4,7 @@ An agentic AI system for automating the complete experimentation lifecycle, from
 
 ## 📌 Overview 
 
-This project implements a multi-agent system: 4 agents that designs, analyzes, and makes decisions on AB tests. Each agent handles a specific phase of the experimentation lifecycle and is exposed via a FastAPI REST API and orchestrated via n8n.
+This project features a multi-agent system, partitioned into 4 specialized agents, each governing a distinct phase of experimentation: hypothesis, design, analysis, and decision-making. The system is exposed via a FastAPI REST API and orchestrated via n8n.
 
 **Current Status:** Phases 1-4 Complete - All agents + API orchestration working
 
