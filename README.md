@@ -1,14 +1,14 @@
-# AB Testing Agent
+# 🤖 Experimentation Agent 
 
 An agentic AI system for automating the complete experimentation lifecycle, from hypothesis generation through experiment design, statistical analysis, and decision-making.
 
-## Overview
+## 📌 Overview 
 
 This project implements a multi-agent system: 4 agents that designs, analyzes, and makes decisions on AB tests. Each agent handles a specific phase of the experimentation lifecycle and is exposed via a FastAPI REST API and orchestrated via n8n.
 
 **Current Status:** Phases 1-4 Complete - All agents + API orchestration working
 
-## Features
+## ⭐ Features 
 
 - **Hypothesis Generation**: AI generates testable hypotheses from business objectives
 - **Experiment Design**: Automatic sample size calculation, power analysis, duration estimation, and variant configuration
@@ -17,9 +17,9 @@ This project implements a multi-agent system: 4 agents that designs, analyzes, a
 - **REST API**: FastAPI endpoints for each agent, ready for any frontend
 - **Synthetic Data**: 3 built-in scenarios for testing and development
 
-## Architecture
+## ⚙️ Architecture 
 
-### Multi-Agent System
+### 🦾 Multi-Agent System 
 
 | Agent | Purpose |
 |-------|---------|
@@ -30,7 +30,7 @@ This project implements a multi-agent system: 4 agents that designs, analyzes, a
 
 All agents use Claude via `langchain-anthropic` with structured output and YAML-based system prompts.
 
-### Technology Stack
+### 💻 Technology Stack 
 
 - **LLM Integration**: `langchain-anthropic` + `langchain-core` (Claude Haiku / Opus)
 - **API**: FastAPI + Uvicorn
@@ -39,7 +39,7 @@ All agents use Claude via `langchain-anthropic` with structured output and YAML-
 - **CLI**: Rich (hypothesis generation only)
 - **Orchestration**: FastAPI REST API (n8n workflow example included)
 
-## Project Structure
+## 📋 Project Structure
 
 ```
 experimentation-agent/
@@ -67,7 +67,7 @@ experimentation-agent/
 └── data/                     # Local SQLite storage
 ```
 
-## Getting Started
+## 🚩 Getting Started
 
 ### Prerequisites
 
@@ -117,7 +117,7 @@ uvicorn src.testing_agent.api.app:app --reload --port 8000
 
 API docs available at http://localhost:8000/docs
 
-## API Endpoints
+## 🔗 API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -135,7 +135,7 @@ curl -X POST http://localhost:8000/api/v1/hypothesis/generate \
   -d '{"business_goal": "Increase checkout conversion rate by simplifying the payment form"}'
 ```
 
-## Statistical Tools
+## 📈 Statistical Tools
 
 The statistical toolkit includes:
 
@@ -145,7 +145,7 @@ The statistical toolkit includes:
 - **Metrics**: Conversion rate aggregation, SRM detection, data quality validation
 - **Confidence Intervals**: For proportions and means
 
-## Synthetic Scenarios
+## 📝 Synthetic Scenarios
 
 Three built-in scenarios for testing:
 
@@ -155,7 +155,7 @@ Three built-in scenarios for testing:
 | Headline Test | 3.0% signup | 3.05% signup | No significance |
 | Form Simplification | 60% completion | 55% completion | Significant negative |
 
-## Configuration
+## 🛠️ Configuration
 
 Environment variables (see `.env.example`):
 
@@ -168,21 +168,21 @@ Environment variables (see `.env.example`):
 | `DEFAULT_POWER` | Statistical power | 0.8 |
 | `DEFAULT_ALPHA` | Significance level | 0.05 |
 
-## What's Complete
+## 📍 What's Complete
 
 - Phase 1: Hypothesis Agent with Claude integration + CLI
 - Phase 2: Statistical tools (power analysis, hypothesis testing, effect sizes, CIs)
 - Phase 3: Design, Analysis, and Decision agents
 - Phase 4: FastAPI orchestration with REST endpoints
 
-## Next Steps
+## 🎯 Next Steps
 
 - **Streamlit UI**: Web interface for running experiments end-to-end (password-protected, deployed on Streamlit Cloud)
 - **Database persistence**: Wire up SQLAlchemy models to store experiment lifecycle
 - **Integration tests**: End-to-end test coverage
 - **Visualization**: Charts for power curves, effect size distributions, results
 
-## Testing
+## 🔬 Testing
 
 ```bash
 pytest                                    # Run all tests
@@ -190,7 +190,7 @@ pytest --cov=ab_testing_agent             # With coverage
 pytest tests/unit/test_tools/             # Statistical tool tests only
 ```
 
-## Code Quality
+## 🛡️ Code Quality
 
 ```bash
 black src/ tests/                         # Format
@@ -198,13 +198,13 @@ ruff check src/ tests/                    # Lint
 mypy src/                                 # Type check
 ```
 
-## Resources
+## 📚 Resources
 
 - [Anthropic Claude API](https://docs.anthropic.com/)
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
 - [Streamlit Documentation](https://docs.streamlit.io/)
-- [AB Testing Best Practices](https://www.exp-platform.com/Documents/GuideControlledExperiments.pdf)
+- [Experimentation Best Practices](https://www.exp-platform.com/Documents/GuideControlledExperiments.pdf)
 
-## License
+## 📄 License
 
 MIT License
