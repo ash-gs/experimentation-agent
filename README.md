@@ -1,56 +1,70 @@
-# AB Testing Agent 🤖
+# AB Testing Agent
 
-An agentic AI system for automating the complete AB testing experimentation lifecycle, from hypothesis generation through experiment design, execution, analysis, and decision-making.
+An agentic AI system for automating the complete experimentation lifecycle, from hypothesis generation through experiment design, statistical analysis, and decision-making.
 
 ## Overview
 
-This project implements a multi-agent system using LangGraph and Claude that helps design, run, and analyze AB tests through natural language conversations.
+This project implements a multi-agent system: 4 agents that designs, analyzes, and makes decisions on AB tests. Each agent handles a specific phase of the experimentation lifecycle and is exposed via a FastAPI REST API and orchestrated via n8n.
 
-**Current Status:** Phase 0 Complete - Foundation ✅
+**Current Status:** Phases 1-4 Complete - All agents + API orchestration working
 
-## Features (Planned)
+## Features
 
-- **Conversational Interface**: Describe your testing goals in natural language
 - **Hypothesis Generation**: AI generates testable hypotheses from business objectives
-- **Experiment Design**: Automatic sample size calculation, power analysis, and configuration
-- **Statistical Analysis**: Rigorous statistical testing with proper interpretations
-- **Decision Support**: Clear ship/no-ship recommendations with rationale
-- **Synthetic Data**: Built-in scenarios for testing and development
+- **Experiment Design**: Automatic sample size calculation, power analysis, duration estimation, and variant configuration
+- **Statistical Analysis**: t-tests, z-tests, chi-square, Mann-Whitney U, bootstrap testing with SRM detection
+- **Decision Support**: Ship/no-ship/iterate recommendations with confidence scores and rationale
+- **REST API**: FastAPI endpoints for each agent, ready for any frontend
+- **Synthetic Data**: 3 built-in scenarios for testing and development
 
 ## Architecture
 
 ### Multi-Agent System
-- **Orchestrator Agent**: Routes requests and maintains conversation context
-- **Hypothesis Agent**: Generates and refines experiment hypotheses
-- **Design Agent**: Calculates sample sizes and experiment parameters
-- **Analysis Agent**: Performs statistical tests and interprets results
-- **Decision Agent**: Provides recommendations based on analysis
+
+| Agent | Purpose |
+|-------|---------|
+| **HypothesisAgent** | Takes business goals, generates testable hypotheses with metrics and expected effect sizes |
+| **DesignAgent** | Creates experiment designs with sample sizes, duration, variants, guardrail metrics |
+| **AnalysisAgent** | Runs statistical tests on experiment data, detects SRM, validates data quality |
+| **DecisionAgent** | Makes ship/no-ship/iterate recommendations based on analysis results |
+
+All agents use Claude via `langchain-anthropic` with structured output and YAML-based system prompts.
 
 ### Technology Stack
-- **Agent Framework**: LangGraph + LangChain
-- **LLM**: Anthropic Claude (3.5 Sonnet / Opus 4.5)
+
+- **LLM Integration**: `langchain-anthropic` + `langchain-core` (Claude Haiku / Opus)
+- **API**: FastAPI + Uvicorn
 - **Statistics**: scipy, statsmodels, pingouin
-- **Data**: pandas + SQLAlchemy + SQLite
-- **Interface**: Rich CLI
+- **Data**: pandas + SQLAlchemy + SQLite + Pydantic
+- **CLI**: Rich (hypothesis generation only)
+- **Orchestration**: FastAPI REST API (n8n workflow example included)
 
 ## Project Structure
 
 ```
-Agents/Experimentation/
-├── src/ab_testing_agent/
-│   ├── agents/              # Agent implementations
-│   ├── workflows/           # LangGraph workflows
-│   ├── tools/               # Statistical & data tools
-│   │   ├── statistical/     # Power analysis, hypothesis testing
-│   │   ├── data/            # Data loaders, validators
-│   │   └── visualization/   # Plotting utilities
-│   ├── data/                # Database models & schemas
-│   ├── synthetic/           # Synthetic data generation
-│   ├── config/              # Configuration & settings
-│   └── interface/           # User interfaces
-├── tests/                   # Test suite
-├── scripts/                 # Utility scripts
-└── data/                    # Local data storage
+experimentation-agent/
+├── src/testing_agent/
+│   ├── agents/               # Agent implementations (base, hypothesis, design, analysis, decision)
+│   ├── api/                  # FastAPI application
+│   │   ├── app.py            # Main app setup with CORS
+│   │   ├── dependencies.py   # Agent dependency injection
+│   │   ├── schemas.py        # Request/response models
+│   │   └── routes/           # Endpoint handlers
+│   ├── config/
+│   │   ├── settings.py       # Pydantic settings (env vars)
+│   │   └── prompts/          # YAML prompt configs per agent
+│   ├── data/
+│   │   └── schemas.py        # Core data models (12+ Pydantic schemas)
+│   ├── tools/
+│   │   └── statistical/      # Power analysis, hypothesis testing, effect sizes, CIs, metrics
+│   ├── synthetic/            # Synthetic data generation (3 scenarios)
+│   ├── interface/            # Rich CLI
+│   └── utils/                # Logging, exceptions
+├── workflows/
+│   └── n8n_examples/         # Example n8n workflow for API orchestration
+├── tests/                    # Unit tests
+├── scripts/                  # DB setup, synthetic data generation
+└── data/                     # Local SQLite storage
 ```
 
 ## Getting Started
@@ -62,15 +76,16 @@ Agents/Experimentation/
 
 ### Installation
 
-1. **Clone and navigate to the project:**
+1. **Clone and set up:**
    ```bash
-   cd /Users/ashby/projects/Agents/Experimentation
+   git clone <repo-url>
+   cd experimentation-agent
    ```
 
 2. **Create and activate virtual environment:**
    ```bash
    python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   source venv/bin/activate
    ```
 
 3. **Install dependencies:**
@@ -94,146 +109,102 @@ Agents/Experimentation/
    python scripts/generate_synthetic_data.py
    ```
 
-### Verify Installation
-
-Check that synthetic experiments were created:
+### Run the API
 
 ```bash
-sqlite3 data/experiments.db "SELECT name, phase, status FROM experiments;"
+uvicorn src.testing_agent.api.app:app --reload --port 8000
 ```
 
-Expected output: 3 synthetic experiments (button color, headline test, form simplification)
+API docs available at http://localhost:8000/docs
 
-## Phase 0 Complete ✅
+## API Endpoints
 
-### What's Working
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/health` | Health check |
+| POST | `/api/v1/hypothesis/generate` | Generate hypothesis from business goal |
+| POST | `/api/v1/design/create` | Create experiment design from hypothesis |
+| POST | `/api/v1/analysis/analyze` | Analyze experiment data |
+| POST | `/api/v1/decision/make` | Make ship/no-ship recommendation |
 
-- ✅ Project structure and dependencies
-- ✅ Configuration system (Pydantic settings)
-- ✅ Database models and schemas (SQLAlchemy + Pydantic)
-- ✅ Synthetic data generation (3 scenarios)
-- ✅ Data repository layer
-- ✅ Logging infrastructure
+### Example: Generate a Hypothesis
 
-### Synthetic Scenarios
+```bash
+curl -X POST http://localhost:8000/api/v1/hypothesis/generate \
+  -H "Content-Type: application/json" \
+  -d '{"business_goal": "Increase checkout conversion rate by simplifying the payment form"}'
+```
 
-1. **Button Color Test (Positive Effect)**
-   - Control: 5.0% conversion
-   - Treatment: 5.5% conversion
-   - Expected: Statistically significant positive result
+## Statistical Tools
 
-2. **Headline Test (Null Result)**
-   - Control: 3.0% signup rate
-   - Treatment: 3.05% signup rate
-   - Expected: No statistical significance
+The statistical toolkit includes:
 
-3. **Form Simplification (Negative Effect)**
-   - Control: 60% completion
-   - Treatment: 55% completion
-   - Expected: Significant negative result
+- **Power Analysis**: Sample size calculation, power curves, minimum detectable effect
+- **Hypothesis Testing**: Two-sample t-test, two-proportion z-test, chi-square, Mann-Whitney U, bootstrap
+- **Effect Sizes**: Cohen's d/h, relative lift, odds ratio, risk ratio, NNT
+- **Metrics**: Conversion rate aggregation, SRM detection, data quality validation
+- **Confidence Intervals**: For proportions and means
 
-## Development Roadmap
+## Synthetic Scenarios
 
-### Phase 1: Single Agent MVP (Next)
-- Implement Hypothesis Agent with Claude integration
-- Build simple CLI interface
-- Add conversation memory
+Three built-in scenarios for testing:
 
-### Phase 2: Statistical Tools
-- Power analysis (sample size calculation)
-- Hypothesis testing (t-test, z-test, chi-square)
-- Confidence intervals
-- Basic visualizations
-
-### Phase 3: Complete Agent Suite
-- Design Agent
-- Analysis Agent
-- Decision Agent
-- Integration tests
-
-### Phase 4: LangGraph Orchestration
-- Full workflow state machine
-- End-to-end CLI
-- Conversation checkpointing
-
-### Future Phases
-- Monitoring Agent (real-time tracking)
-- Documentation Agent (automated reporting)
-- Web UI (Streamlit)
-- Data warehouse connectors
+| Scenario | Control | Treatment | Expected Result |
+|----------|---------|-----------|-----------------|
+| Button Color Test | 5.0% conversion | 5.5% conversion | Significant positive |
+| Headline Test | 3.0% signup | 3.05% signup | No significance |
+| Form Simplification | 60% completion | 55% completion | Significant negative |
 
 ## Configuration
 
-All configuration is managed through environment variables. See `.env.example` for available options:
+Environment variables (see `.env.example`):
 
-- `ANTHROPIC_API_KEY`: Your Claude API key (required)
-- `DEFAULT_MODEL`: Claude model for most agents
-- `LOG_LEVEL`: Logging verbosity (DEBUG, INFO, WARNING, ERROR)
-- `DATABASE_URL`: Database connection string
-- `DEFAULT_POWER`: Statistical power for experiments (default: 0.8)
-- `DEFAULT_ALPHA`: Significance level (default: 0.05)
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ANTHROPIC_API_KEY` | Claude API key | (required) |
+| `DEFAULT_MODEL` | Claude model for agents | claude-3-haiku-20240307 |
+| `LOG_LEVEL` | Logging verbosity | INFO |
+| `DATABASE_URL` | Database connection | sqlite:///data/experiments.db |
+| `DEFAULT_POWER` | Statistical power | 0.8 |
+| `DEFAULT_ALPHA` | Significance level | 0.05 |
 
-## Data Models
+## What's Complete
 
-### Key Schemas
+- Phase 1: Hypothesis Agent with Claude integration + CLI
+- Phase 2: Statistical tools (power analysis, hypothesis testing, effect sizes, CIs)
+- Phase 3: Design, Analysis, and Decision agents
+- Phase 4: FastAPI orchestration with REST endpoints
 
-- **ExperimentStateSchema**: Complete experiment through lifecycle
-- **HypothesisSchema**: Testable hypothesis with metrics
-- **DesignConfigSchema**: Experiment design parameters
-- **AnalysisResultSchema**: Statistical test results
-- **DecisionSchema**: Final recommendation with rationale
+## Next Steps
 
-### Database Tables
-
-- **experiments**: Experiment metadata and lifecycle state
-- **variants**: Variant configurations (control, treatments)
-- **user_events**: Individual user interactions and conversions
-- **metric_definitions**: Metric catalog
+- **Streamlit UI**: Web interface for running experiments end-to-end (password-protected, deployed on Streamlit Cloud)
+- **Database persistence**: Wire up SQLAlchemy models to store experiment lifecycle
+- **Integration tests**: End-to-end test coverage
+- **Visualization**: Charts for power curves, effect size distributions, results
 
 ## Testing
 
 ```bash
-# Run all tests
-pytest
-
-# Run with coverage
-pytest --cov=ab_testing_agent
-
-# Run specific test file
-pytest tests/unit/test_synthetic/test_generators.py
+pytest                                    # Run all tests
+pytest --cov=ab_testing_agent             # With coverage
+pytest tests/unit/test_tools/             # Statistical tool tests only
 ```
 
 ## Code Quality
 
 ```bash
-# Format code
-black src/ tests/
-
-# Lint
-ruff check src/ tests/
-
-# Type check
-mypy src/
+black src/ tests/                         # Format
+ruff check src/ tests/                    # Lint
+mypy src/                                 # Type check
 ```
-
-## Contributing
-
-This is a personal experimentation project. Phase 0 establishes the foundation for the agentic AB testing system.
-
-## License
-
-MIT License - See LICENSE file for details
 
 ## Resources
 
-- [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)
 - [Anthropic Claude API](https://docs.anthropic.com/)
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [Streamlit Documentation](https://docs.streamlit.io/)
 - [AB Testing Best Practices](https://www.exp-platform.com/Documents/GuideControlledExperiments.pdf)
 
-## Contact
+## License
 
-Questions or feedback? Open an issue in the repository.
-
----
-
-**Status**: Phase 0 Complete - Foundation established with database, schemas, and synthetic data generation. Ready for Phase 1: First working agent with LLM integration.
+MIT License
