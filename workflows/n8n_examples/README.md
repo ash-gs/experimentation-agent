@@ -7,8 +7,8 @@ This workflow orchestrates the complete AB testing lifecycle using the 4 agents.
 ### 1. Start the API Server
 
 ```bash
-cd /Users/ashby/experimentation-agent
-python3.11 -m uvicorn ab_testing_agent.api.app:app --reload
+cd experimentation-agent
+uvicorn src.testing_agent.api.app:app --reload --port 8000
 ```
 
 The API will start at http://localhost:8000
