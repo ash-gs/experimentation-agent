@@ -151,9 +151,9 @@ Three built-in scenarios for testing:
 
 | Scenario | Control | Treatment | Expected Result |
 |----------|---------|-----------|-----------------|
-| Button Color Test | 5.0% conversion | 5.5% conversion | Significant positive |
-| Headline Test | 3.0% signup | 3.05% signup | No significance |
-| Form Simplification | 60% completion | 55% completion | Significant negative |
+| Widget Test | 5.0% conversion | 5.5% conversion | Significant positive |
+| CRM Test | 3.0% signup | 3.05% signup | No significance |
+| Activation Funnel Test | 60% completion | 55% completion | Significant negative |
 
 ## 🛠️ Configuration
 
